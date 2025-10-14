@@ -112,7 +112,7 @@ def main():
                 how_many = int(input("How many repeat: "))
 
                 for _ in range(how_many):
-                    purchase_loop(family_code, order, use_decoy, 0 if delay == "" else delay)
+                    purchase_loop(family_code, order, use_decoy, 0 if delay == "" else int(delay))
                 input("ENTER KE MENU")
             elif choice == "00":
                 show_bookmark_menu()
