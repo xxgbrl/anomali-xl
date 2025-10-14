@@ -2,6 +2,8 @@ import json
 import sys
 
 import requests
+
+from app.client.encrypt import BASE_CRYPTO_URL
 from app.service.auth import AuthInstance
 from app.client.engsel import get_family, get_package, get_addons, get_package_details, send_api_request
 from app.service.bookmark import BookmarkInstance
@@ -203,7 +205,7 @@ def show_package_details(api_key, tokens, package_option_code, is_enterprise, op
             return True
         elif choice == '4':
             # Balance; Decoy XCP
-            url = "https://me.mashu.lol/pg-decoy-xcp.json"
+            url = BASE_CRYPTO_URL + "/decoyxcp"
             
             response = requests.get(url, timeout=30)
             if response.status_code != 200:
@@ -266,7 +268,7 @@ def show_package_details(api_key, tokens, package_option_code, is_enterprise, op
             return True
         elif choice == '5':
             # Balance; Decoy XCP V2
-            url = "https://me.mashu.lol/pg-decoy-xcp.json"
+            url = BASE_CRYPTO_URL + "/decoyxcp"
             
             response = requests.get(url, timeout=30)
             if response.status_code != 200:

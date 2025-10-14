@@ -1,5 +1,7 @@
 from random import randint
 import requests
+
+from app.client.encrypt import BASE_CRYPTO_URL
 from app.client.engsel import get_family, get_package_details
 from app.menus.util import pause
 from app.service.auth import AuthInstance
@@ -18,7 +20,7 @@ def purchase_by_family(
     
     if use_decoy:
         # Balance; Decoy XCP
-        url = "https://me.mashu.lol/pg-decoy-xcp.json"
+        url = BASE_CRYPTO_URL + "/decoyxcp"
         
         response = requests.get(url, timeout=30)
         if response.status_code != 200:
@@ -204,7 +206,7 @@ def purchase_n_times(
     
     if use_decoy:
         # Balance; Decoy XCP
-        url = "https://me.mashu.lol/pg-decoy-xcp.json"
+        url = BASE_CRYPTO_URL + "/decoyxcp"
         
         response = requests.get(url, timeout=30)
         if response.status_code != 200:

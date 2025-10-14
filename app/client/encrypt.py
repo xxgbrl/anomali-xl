@@ -14,15 +14,14 @@ API_KEY = os.getenv("API_KEY")
 AES_KEY_ASCII = os.getenv("AES_KEY_ASCII")
 AX_FP_KEY = os.getenv("AX_FP_KEY")
 
-BASE_CRYPTO_URL = "https://crypto.mashu.lol/api/880"
-# BASE_CRYPTO_URL = "http://127.0.0.1:5000/api/880"  # For local testing
+BASE_CRYPTO_URL = "https://xlc.gemail.ink"
 
-XDATA_DECRYPT_URL = f"{BASE_CRYPTO_URL}/decrypt"
-XDATA_ENCRYPT_SIGN_URL = f"{BASE_CRYPTO_URL}/encryptsign"
-PAYMENT_SIGN_URL = f"{BASE_CRYPTO_URL}/sign-payment"
-BOUNTY_SIGN_URL = f"{BASE_CRYPTO_URL}/sign-bounty"
-LOYALTY_SIGN_URL = f"{BASE_CRYPTO_URL}/sign-loyalty"
-AX_SIGN_URL = f"{BASE_CRYPTO_URL}/sign-ax"
+XDATA_DECRYPT_URL = f"{BASE_CRYPTO_URL}/xdatadec"
+XDATA_ENCRYPT_SIGN_URL = f"{BASE_CRYPTO_URL}/xdataenc"
+PAYMENT_SIGN_URL = f"{BASE_CRYPTO_URL}/paysign"
+BOUNTY_SIGN_URL = f"{BASE_CRYPTO_URL}/bountysign"
+LOYALTY_SIGN_URL = f"{BASE_CRYPTO_URL}/rolaysign"
+AX_SIGN_URL = f"{BASE_CRYPTO_URL}/ax_sign"
 
 @dataclass
 class DeviceInfo:
