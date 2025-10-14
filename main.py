@@ -13,7 +13,7 @@ from app.menus.account import show_account_menu
 from app.menus.package import fetch_my_packages, get_packages_by_family
 from app.menus.hot import show_hot_menu, show_hot_menu2
 from app.service.sentry import enter_sentry_mode
-from app.menus.purchase import purchase_by_family
+from app.menus.purchase import purchase_by_family, purchase_loop
 
 WIDTH = 55
 
@@ -33,6 +33,7 @@ def show_main_menu(profile):
     print("5. Beli Paket Berdasarkan Family Code")
     print("6. Riwayat Transaksi")
     print("7. [Test] Purchase all packages in family code")
+    print("8. Order berulang by Family Code")
     print("00. Bookmark Paket")
     print("99. Tutup aplikasi")
     print("-------------------------------------------------------")
@@ -101,6 +102,18 @@ def main():
                 use_decoy = input("Use decoy package? (y/n): ").lower() == 'y'
                 pause_on_success = input("Pause on each successful purchase? (y/n): ").lower() == 'y'
                 purchase_by_family(family_code, use_decoy, pause_on_success)
+            elif choice == '8':
+                family_code = input("Enter family code (or '99' to cancel): ")
+                if family_code == "99":
+                    continue
+                use_decoy = input("Use decoy package? (y/n): ").lower() == 'y'
+                order = int(input("Input No order from list family code: "))
+                delay = input("Delay (sec): ")
+                how_many = int(input("How many repeat: "))
+
+                for _ in range(how_many):
+                    purchase_loop(family_code, order, use_decoy, 0 if delay == "" else delay)
+                input("ENTER KE MENU")
             elif choice == "00":
                 show_bookmark_menu()
             elif choice == "99":
