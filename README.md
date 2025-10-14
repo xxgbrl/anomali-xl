@@ -20,7 +20,7 @@ git clone https://saus.gemail.ink/anomali/anomali-xl
 ```
 4. Open the folder
 ```
-cd me-cli
+cd anomali-xl
 ```
 5. Setup
 ```
