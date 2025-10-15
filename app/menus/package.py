@@ -334,6 +334,9 @@ def show_package_details(api_key, tokens, package_option_code, is_enterprise, op
         elif choice == '6':
             use_decoy_for_n_times = input("Use decoy package? (y/n): ").strip().lower() == 'y'
             n_times_str = input("Enter number of times to purchase (e.g., 3): ").strip()
+
+            delay_seconds_str = input("Delay (sec): ").strip()
+
             try:
                 n_times = int(n_times_str)
                 if n_times < 1:
@@ -348,6 +351,7 @@ def show_package_details(api_key, tokens, package_option_code, is_enterprise, op
                 variant_code=package.get("package_detail_variant", {}).get("package_variant_code",""),
                 option_order=option_order,
                 use_decoy=use_decoy_for_n_times,
+                delay_seconds=0 if delay_seconds_str.isdigit() else int(delay),
                 pause_on_success=False,
             )
                 

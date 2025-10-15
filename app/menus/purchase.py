@@ -199,6 +199,7 @@ def purchase_n_times(
     variant_code: str,
     option_order: int,
     use_decoy: bool,
+    delay_seconds: int = 0,
     pause_on_success: bool = False,
     token_confirmation_idx: int = 0,
 ):
@@ -376,6 +377,11 @@ def purchase_n_times(
             print(f"Exception occurred while creating order: {e}")
             res = None
         print("-------------------------------------------------------")
+
+        if delay_seconds > 0 and i < n - 1:
+            print(f"Waiting for {delay_seconds} seconds before next purchase...")
+            time.sleep(delay_seconds)
+
     print(f"Total successful purchases {len(successful_purchases)}/{n} for:\nFamily: {family_name}\nVariant: {target_variant['name']}\nOption: {option_order}. {option_name} - {option_price}")
     if len(successful_purchases) > 0:
         print("-------------------------------------------------------")
