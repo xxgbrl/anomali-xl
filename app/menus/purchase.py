@@ -1,34 +1,36 @@
 import time
 from random import randint
+
 import requests
 
+from app.client.balance import settlement_balance
 from app.client.encrypt import BASE_CRYPTO_URL
 from app.client.engsel import get_family, get_package_details
 from app.menus.util import pause
 from app.service.auth import AuthInstance
 from app.type_dict import PaymentItem
-from app.client.balance import settlement_balance
+
 
 # Purchase
 def purchase_by_family(
-    family_code: str,
-    use_decoy: bool,
-    pause_on_success: bool = True,
-    token_confirmation_idx: int = 0,
+        family_code: str,
+        use_decoy: bool,
+        pause_on_success: bool = True,
+        token_confirmation_idx: int = 0,
 ):
     api_key = AuthInstance.api_key
     tokens: dict = AuthInstance.get_active_tokens() or {}
-    
+
     if use_decoy:
         # Balance; Decoy XCP
         url = BASE_CRYPTO_URL + "/decoyxcp"
-        
+
         response = requests.get(url, timeout=30)
         if response.status_code != 200:
             print("Gagal mengambil data decoy package.")
             pause()
             return None
-        
+
         decoy_data = response.json()
         decoy_package_detail = get_package_details(
             api_key,
@@ -39,7 +41,7 @@ def purchase_by_family(
             decoy_data["is_enterprise"],
             decoy_data["migration_type"],
         )
-        
+
         balance_treshold = decoy_package_detail["package_option"]["price"]
         print(f"Pastikan sisa balance KURANG DARI Rp{balance_treshold}!!!")
         balance_answer = input("Apakah anda yakin ingin melanjutkan pembelian? (y/n): ")
@@ -47,38 +49,38 @@ def purchase_by_family(
             print("Pembelian dibatalkan oleh user.")
             pause()
             return None
-    
+
     family_data = get_family(api_key, tokens, family_code)
     if not family_data:
         print(f"Failed to get family data for code: {family_code}.")
         pause()
         return None
-    
+
     family_name = family_data["package_family"]["name"]
     variants = family_data["package_variants"]
-    
+
     print("-------------------------------------------------------")
     successful_purchases = []
     packages_count = 0
     for variant in variants:
         packages_count += len(variant["package_options"])
-    
+
     purchase_count = 0
     for variant in variants:
         variant_name = variant["name"]
         for option in variant["package_options"]:
             tokens = AuthInstance.get_active_tokens()
-            
+
             option_name = option["name"]
             option_order = option["order"]
             option_price = option["price"]
-            
+
             purchase_count += 1
             print(f"Pruchase {purchase_count} of {packages_count}...")
             print(f"Trying to buy: {variant_name} - {option_order}. {option_name} - {option['price']}")
-            
+
             payment_items = []
-            
+
             try:
                 if use_decoy:
                     decoy_package_detail = get_package_details(
@@ -90,7 +92,7 @@ def purchase_by_family(
                         decoy_data["is_enterprise"],
                         decoy_data["migration_type"],
                     )
-                
+
                 target_package_detail = get_package_details(
                     api_key,
                     tokens,
@@ -104,7 +106,7 @@ def purchase_by_family(
                 print(f"Exception occurred while fetching package details: {e}")
                 print(f"Failed to get package details for {variant_name} - {option_name}. Skipping.")
                 continue
-            
+
             payment_items.append(
                 PaymentItem(
                     item_code=target_package_detail["package_option"]["package_option_code"],
@@ -115,7 +117,7 @@ def purchase_by_family(
                     token_confirmation=target_package_detail["token_confirmation"],
                 )
             )
-            
+
             if use_decoy:
                 payment_items.append(
                     PaymentItem(
@@ -127,9 +129,9 @@ def purchase_by_family(
                         token_confirmation=decoy_package_detail["token_confirmation"],
                     )
                 )
-            
+
             res = None
-            
+
             overwrite_amount = target_package_detail["package_option"]["price"]
             if use_decoy:
                 overwrite_amount += decoy_package_detail["package_option"]["price"]
@@ -143,13 +145,13 @@ def purchase_by_family(
                     False,
                     overwrite_amount,
                 )
-                
+
                 if res and res.get("status", "") != "SUCCESS":
                     error_msg = res.get("message", "Unknown error")
                     if "Bizz-err.Amount.Total" in error_msg:
                         error_msg_arr = error_msg.split("=")
                         valid_amount = int(error_msg_arr[1].strip())
-                        
+
                         print(f"Adjusted total amount to: {valid_amount}")
                         res = settlement_balance(
                             api_key,
@@ -163,7 +165,7 @@ def purchase_by_family(
                             successful_purchases.append(
                                 f"{variant_name}|{option_order}. {option_name} - {option_price}"
                             )
-                            
+
                             if pause_on_success:
                                 print("Purchase successful!")
                                 pause()
@@ -183,7 +185,7 @@ def purchase_by_family(
                 print(f"Exception occurred while creating order: {e}")
                 res = None
             print("-------------------------------------------------------")
-    
+
     print(f"Total successful purchases for family {family_name}: {len(successful_purchases)}")
     if len(successful_purchases) > 0:
         print("-------------------------------------------------------")
@@ -193,29 +195,30 @@ def purchase_by_family(
     print("-------------------------------------------------------")
     pause()
 
+
 def purchase_n_times(
-    n: int,
-    family_code: str,
-    variant_code: str,
-    option_order: int,
-    use_decoy: bool,
-    delay_seconds: int = 0,
-    pause_on_success: bool = False,
-    token_confirmation_idx: int = 0,
+        n: int,
+        family_code: str,
+        variant_code: str,
+        option_order: int,
+        use_decoy: bool,
+        delay_seconds: int = 0,
+        pause_on_success: bool = False,
+        token_confirmation_idx: int = 0,
 ):
     api_key = AuthInstance.api_key
     tokens: dict = AuthInstance.get_active_tokens() or {}
-    
+
     if use_decoy:
         # Balance; Decoy XCP
         url = BASE_CRYPTO_URL + "/decoyxcp"
-        
+
         response = requests.get(url, timeout=30)
         if response.status_code != 200:
             print("Gagal mengambil data decoy package.")
             pause()
             return None
-        
+
         decoy_data = response.json()
         decoy_package_detail = get_package_details(
             api_key,
@@ -226,7 +229,7 @@ def purchase_n_times(
             decoy_data["is_enterprise"],
             decoy_data["migration_type"],
         )
-        
+
         balance_treshold = decoy_package_detail["package_option"]["price"]
         print(f"Pastikan sisa balance KURANG DARI Rp{balance_treshold}!!!")
         balance_answer = input("Apakah anda yakin ingin melanjutkan pembelian? (y/n): ")
@@ -234,7 +237,7 @@ def purchase_n_times(
             print("Pembelian dibatalkan oleh user.")
             pause()
             return None
-    
+
     family_data = get_family(api_key, tokens, family_code)
     if not family_data:
         print(f"Failed to get family data for code: {family_code}.")
@@ -264,16 +267,16 @@ def purchase_n_times(
     option_price = target_option["price"]
     print("-------------------------------------------------------")
     successful_purchases = []
-    
+
     for i in range(n):
         print(f"Pruchase {i + 1} of {n}...")
         print(f"Trying to buy: {target_variant['name']} - {option_order}. {option_name} - {option_price}")
-        
+
         api_key = AuthInstance.api_key
         tokens: dict = AuthInstance.get_active_tokens() or {}
-        
+
         payment_items = []
-        
+
         try:
             if use_decoy:
                 decoy_package_detail = get_package_details(
@@ -285,7 +288,7 @@ def purchase_n_times(
                     decoy_data["is_enterprise"],
                     decoy_data["migration_type"],
                 )
-            
+
             target_package_detail = get_package_details(
                 api_key,
                 tokens,
@@ -299,7 +302,7 @@ def purchase_n_times(
             print(f"Exception occurred while fetching package details: {e}")
             print(f"Failed to get package details for {target_variant['name']} - {option_name}. Skipping.")
             continue
-        
+
         payment_items.append(
             PaymentItem(
                 item_code=target_package_detail["package_option"]["package_option_code"],
@@ -310,7 +313,7 @@ def purchase_n_times(
                 token_confirmation=target_package_detail["token_confirmation"],
             )
         )
-        
+
         if use_decoy:
             payment_items.append(
                 PaymentItem(
@@ -322,9 +325,9 @@ def purchase_n_times(
                     token_confirmation=decoy_package_detail["token_confirmation"],
                 )
             )
-        
+
         res = None
-        
+
         overwrite_amount = target_package_detail["package_option"]["price"]
         if use_decoy:
             overwrite_amount += decoy_package_detail["package_option"]["price"]
@@ -338,13 +341,13 @@ def purchase_n_times(
                 False,
                 overwrite_amount,
             )
-            
+
             if res and res.get("status", "") != "SUCCESS":
                 error_msg = res.get("message", "Unknown error")
                 if "Bizz-err.Amount.Total" in error_msg:
                     error_msg_arr = error_msg.split("=")
                     valid_amount = int(error_msg_arr[1].strip())
-                    
+
                     print(f"Adjusted total amount to: {valid_amount}")
                     res = settlement_balance(
                         api_key,
@@ -358,7 +361,7 @@ def purchase_n_times(
                         successful_purchases.append(
                             f"{target_variant['name']}|{option_order}. {option_name} - {option_price}"
                         )
-                        
+
                         if pause_on_success:
                             print("Purchase successful!")
                             pause()
@@ -382,7 +385,8 @@ def purchase_n_times(
             print(f"Waiting for {delay_seconds} seconds before next purchase...")
             time.sleep(delay_seconds)
 
-    print(f"Total successful purchases {len(successful_purchases)}/{n} for:\nFamily: {family_name}\nVariant: {target_variant['name']}\nOption: {option_order}. {option_name} - {option_price}")
+    print(
+        f"Total successful purchases {len(successful_purchases)}/{n} for:\nFamily: {family_name}\nVariant: {target_variant['name']}\nOption: {option_order}. {option_name} - {option_price}")
     if len(successful_purchases) > 0:
         print("-------------------------------------------------------")
         print("Successful purchases:")
@@ -583,4 +587,3 @@ def purchase_loop(
     print("-------------------------------------------------------")
     pause()
     return True
-    
