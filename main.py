@@ -1,3 +1,5 @@
+import time
+
 from dotenv import load_dotenv
 
 load_dotenv() 
@@ -111,8 +113,7 @@ def main():
                 delay = input("Delay (sec): ")
                 how_many = int(input("How many repeat: "))
 
-                for _ in range(how_many):
-                    purchase_loop(family_code, order, use_decoy, 0 if delay == "" else int(delay))
+                purchase_loop(how_many, family_code, order, use_decoy, 0 if delay == "" else int(delay))
                 input("ENTER KE MENU")
             elif choice == "00":
                 show_bookmark_menu()
