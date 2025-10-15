@@ -114,7 +114,6 @@ def main():
                 how_many = int(input("How many repeat: "))
 
                 purchase_loop(how_many, family_code, order, use_decoy, 0 if delay == "" else int(delay))
-                input("ENTER KE MENU")
             elif choice == "00":
                 show_bookmark_menu()
             elif choice == "99":

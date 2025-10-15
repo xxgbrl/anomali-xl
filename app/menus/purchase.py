@@ -401,7 +401,13 @@ def purchase_loop(
         delay: int = 0,
         pause_on_success: bool = False,
 ):
+    family_name = None
+    target_variant = None
+    successful_purchases = []
+
     for i in range(loop):
+        print(f"Pruchase {i + 1} of {loop}...")
+
         api_key = AuthInstance.api_key
         tokens: dict = AuthInstance.get_active_tokens() or {}
 
@@ -411,6 +417,8 @@ def purchase_loop(
             print(f"Failed to get family data for code: {family_code}.")
             pause()
             return
+
+        family_name = family_data["package_family"]["name"]
 
         target_variant = None
         target_option = None
@@ -427,6 +435,9 @@ def purchase_loop(
             print(f"Package with order {order} not found in family {family_code}.")
             pause()
             return
+
+        option_name = target_option["name"]
+        option_price = target_option["price"]
 
         variant_code = target_variant["package_variant_code"]
 
@@ -535,12 +546,18 @@ def purchase_loop(
                         valid_amount,
                     )
                     if res and res.get("status", "") == "SUCCESS":
+                        successful_purchases.append(
+                            f"{target_variant['name']}|{option_name} - {option_price}"
+                        )
                         print(f"Purchase successful! {i + 1}")
                         if pause_on_success:
                             choice = input("Lanjut Dor? (Y/N): ")
                             if choice.lower() == 'n':
                                 return False
             else:
+                successful_purchases.append(
+                    f"{target_variant['name']}|{option_name} - {option_price}"
+                )
                 print(f"Purchase successful! {i + 1}")
                 if pause_on_success:
                     choice = input("Lanjut Dor? (Y/N): ")
@@ -555,5 +572,15 @@ def purchase_loop(
         if delay > 0 and i < loop - 1:
             print(f"Waiting for {delay} seconds before next purchase...")
             time.sleep(delay)
+
+    print(
+        f"Total successful purchases {len(successful_purchases)}/{loop} for:\nFamily: {family_name}\nVariant: {target_variant['name']}")
+    if len(successful_purchases) > 0:
+        print("-------------------------------------------------------")
+        print("Successful purchases:")
+        for idx, purchase in enumerate(successful_purchases):
+            print(f"{idx + 1}. {purchase}")
+    print("-------------------------------------------------------")
+    pause()
     return True
     
