@@ -44,6 +44,12 @@ show_menu = True
 
 
 def main():
+    if not os.path.exists("apikey.anomali"):
+        print("GENERATE APIKEY DI BOT t.me/AnomalingeongBot")
+        input_api = input("MASUKAN APIKEY: ")
+        with open("apikey.anomali", "w") as f:
+            f.write(input_api)
+
     while True:
         active_user = AuthInstance.get_active_user()
 

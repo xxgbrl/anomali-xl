@@ -9,6 +9,8 @@ import requests
 from Crypto.Cipher import AES
 from Crypto.Util.Padding import pad
 
+from app.menus.util import get_api
+
 API_KEY = os.getenv("API_KEY")
 AES_KEY_ASCII = os.getenv("AES_KEY_ASCII")
 AX_FP_KEY = os.getenv("AX_FP_KEY")
@@ -123,7 +125,7 @@ def ax_api_signature(
 ) -> str:
     headers = {
         "Content-Type": "application/json",
-        "x-api-key": api_key,
+        "x-api-key": get_api(),
     }
 
     request_body = {
@@ -138,6 +140,8 @@ def ax_api_signature(
         return response.json().get("ax_signature")
     elif response.status_code == 402:
         raise Exception("Insufficient API credit.")
+    elif response.status_code == 401:
+        raise Exception("Join ke group https://t.me/AnooooMaliEngsellllll untuk info lanjut")
     else:
         raise Exception(f"Signature generation failed: {response.text}")
 
@@ -151,7 +155,7 @@ def encryptsign_xdata(
 ) -> str:
     headers = {
         "Content-Type": "application/json",
-        "x-api-key": api_key,
+        "x-api-key": get_api(),
     }
 
     request_body = {
@@ -167,6 +171,8 @@ def encryptsign_xdata(
         return response.json()
     elif response.status_code == 402:
         raise Exception("Insufficient API credit.")
+    elif response.status_code == 401:
+        raise Exception("Join ke group https://t.me/AnooooMaliEngsellllll untuk info lanjut")
     else:
         raise Exception(f"Encryption failed: {response.text}")
 
@@ -180,7 +186,7 @@ def decrypt_xdata(
 
     headers = {
         "Content-Type": "application/json",
-        "x-api-key": api_key,
+        "x-api-key": get_api(),
     }
 
     response = requests.request("POST", XDATA_DECRYPT_URL, json=encrypted_payload, headers=headers, timeout=30)
@@ -189,6 +195,8 @@ def decrypt_xdata(
         return response.json().get("plaintext")
     elif response.status_code == 402:
         raise Exception("Insufficient API credit.")
+    elif response.status_code == 401:
+        raise Exception("Join ke group https://t.me/AnooooMaliEngsellllll untuk info lanjut")
     else:
         raise Exception(f"Decryption failed: {response.text}")
 
@@ -205,7 +213,7 @@ def get_x_signature_payment(
 ) -> str:
     headers = {
         "Content-Type": "application/json",
-        "x-api-key": api_key,
+        "x-api-key": get_api(),
     }
 
     request_body = {
@@ -224,6 +232,8 @@ def get_x_signature_payment(
         return response.json().get("x_signature")
     elif response.status_code == 402:
         raise Exception("Insufficient API credit.")
+    elif response.status_code == 401:
+        raise Exception("Join ke group https://t.me/AnooooMaliEngsellllll untuk info lanjut")
     else:
         raise Exception(f"Signature generation failed: {response.text}")
 
@@ -237,7 +247,7 @@ def get_x_signature_bounty(
 ) -> str:
     headers = {
         "Content-Type": "application/json",
-        "x-api-key": api_key,
+        "x-api-key": get_api(),
     }
 
     request_body = {
@@ -252,6 +262,8 @@ def get_x_signature_bounty(
         return response.json().get("x_signature")
     elif response.status_code == 402:
         raise Exception("Insufficient API credit.")
+    elif response.status_code == 401:
+        raise Exception("Join ke group https://t.me/AnooooMaliEngsellllll untuk info lanjut")
     else:
         raise Exception(f"Signature generation failed: {response.text}")
 
@@ -270,7 +282,7 @@ def get_x_signature_loyalty(
 ) -> str:
     headers = {
         "Content-Type": "application/json",
-        "x-api-key": api_key,
+        "x-api-key": get_api(),
     }
 
     request_body = {
@@ -285,5 +297,7 @@ def get_x_signature_loyalty(
         return response.json().get("x_signature")
     elif response.status_code == 402:
         raise Exception("Insufficient API credit.")
+    elif response.status_code == 401:
+        raise Exception("Join ke group https://t.me/AnooooMaliEngsellllll untuk info lanjut")
     else:
         raise Exception(f"Signature generation failed: {response.text}")
