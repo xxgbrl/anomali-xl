@@ -32,8 +32,7 @@ def login_prompt(api_key: str):
             return None, None
         print("OTP Berhasil dikirim ke nomor Anda.")
 
-        otp_retry = True
-        while otp_retry:
+        while True:
             otp = input("Masukkan OTP yang telah dikirim: ")
             if not otp.isdigit() or len(otp) != 6:
                 continue
