@@ -24,25 +24,25 @@ def login_prompt(api_key: str):
 
     if not phone_number.startswith("628") or len(phone_number) < 10 or len(phone_number) > 14:
         print("Nomor tidak valid. Pastikan nomor diawali dengan '628' dan memiliki panjang yang benar.")
-        return None
+        return None, None
 
     try:
         subscriber_id = get_otp(phone_number)
         if not subscriber_id:
-            return None
+            return None, None
         print("OTP Berhasil dikirim ke nomor Anda.")
 
         otp = input("Masukkan OTP yang telah dikirim: ")
         if not otp.isdigit() or len(otp) != 6:
             print("OTP tidak valid. Pastikan OTP terdiri dari 6 digit angka.")
             pause()
-            return None
+            return None, None
 
         tokens = submit_otp(api_key, phone_number, otp)
         if not tokens:
             print("Gagal login. Periksa OTP dan coba lagi.")
             pause()
-            return None
+            return None, None
 
         print("Berhasil login!")
 
@@ -65,7 +65,9 @@ def show_account_menu():
         clear_screen()
         print("-------------------------------------------------------")
         if AuthInstance.get_active_user() is None or add_user:
-            number, refresh_token = login_prompt(AuthInstance.api_key)
+            refresh_token = None
+            while not refresh_token:
+                number, refresh_token = login_prompt(AuthInstance.api_key)
             if not refresh_token:
                 print("Gagal menambah akun. Silahkan coba lagi.")
                 pause()
@@ -94,7 +96,7 @@ def show_account_menu():
         print("00: Kembali ke menu utama")
         print("99: Hapus Akun aktif")
         print("Masukan nomor akun untuk berganti.")
-        input_str = input("Pilihan:")
+        input_str = input("Pilihan: ")
         if input_str == "00":
             in_account_menu = False
             return active_user["number"] if active_user else None
