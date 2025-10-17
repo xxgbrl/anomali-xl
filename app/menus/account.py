@@ -32,21 +32,19 @@ def login_prompt(api_key: str):
             return None, None
         print("OTP Berhasil dikirim ke nomor Anda.")
 
-        otp = input("Masukkan OTP yang telah dikirim: ")
-        if not otp.isdigit() or len(otp) != 6:
-            print("OTP tidak valid. Pastikan OTP terdiri dari 6 digit angka.")
-            pause()
-            return None, None
+        otp_retry = True
+        while otp_retry:
+            otp = input("Masukkan OTP yang telah dikirim: ")
+            if not otp.isdigit() or len(otp) != 6:
+                continue
 
-        tokens = submit_otp(api_key, phone_number, otp)
-        if not tokens:
-            print("Gagal login. Periksa OTP dan coba lagi.")
-            pause()
-            return None, None
+            tokens = submit_otp(api_key, phone_number, otp)
+            if not tokens:
+                print("Gagal login. Periksa OTP dan coba lagi.")
+                continue
 
-        print("Berhasil login!")
-
-        return phone_number, tokens["refresh_token"]
+            print("Berhasil login!")
+            return phone_number, tokens["refresh_token"]
     except Exception as e:
         return None, None
 
@@ -65,9 +63,7 @@ def show_account_menu():
         clear_screen()
         print("-------------------------------------------------------")
         if AuthInstance.get_active_user() is None or add_user:
-            refresh_token = None
-            while not refresh_token:
-                number, refresh_token = login_prompt(AuthInstance.api_key)
+            number, refresh_token = login_prompt(AuthInstance.api_key)
             if not refresh_token:
                 print("Gagal menambah akun. Silahkan coba lagi.")
                 pause()
