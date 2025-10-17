@@ -3,6 +3,7 @@ import sys
 
 import requests
 
+from app.client.engsel2 import unsubscribe
 from app.client.balance import settlement_balance
 from app.client.encrypt import BASE_CRYPTO_URL
 from app.client.engsel import get_family, get_package, get_addons, get_package_details, send_api_request
@@ -586,7 +587,9 @@ def fetch_my_packages():
         group_name = quota["group_name"]
         quota_name = quota["name"]
         family_code = "N/A"
-
+        
+        product_subscription_type = quota.get("product_subscription_type", "")
+        product_domain = quota.get("product_domain", "")
         benefit_infos = []
         benefits = quota.get("benefits", [])
         if len(benefits) > 0:
@@ -658,14 +661,49 @@ def fetch_my_packages():
 
         my_packages.append({
             "number": num,
+            "name": quota_name,
             "quota_code": quota_code,
+            "product_subscription_type": product_subscription_type,
+            "product_domain": product_domain,
         })
 
         num += 1
 
-    print("Rebuy package? Input package number to rebuy, or '00' to back.")
+    print("Input package number to view detail.")
+    print("Input del <package number> to unsubscribe from a package.")
+    print("Input 00 to return to main menu.")
     choice = input("Choice: ")
     if choice == "00":
+        return None
+    if choice.startswith("del "):
+        del_parts = choice.split(" ")
+        if len(del_parts) != 2 or not del_parts[1].isdigit():
+            print("Invalid input for delete command.")
+            pause()
+            return None
+        del_number = int(del_parts[1])
+        del_pkg = next((pkg for pkg in my_packages if pkg["number"] == del_number), None)
+        if not del_pkg:
+            print("Package not found for deletion.")
+            pause()
+            return None
+        confirm = input(f"Are you sure you want to unsubscribe from package  {del_number}. {del_pkg['name']}? (y/n): ")
+        if confirm.lower() == 'y':
+            print(f"Unsubscribing from package number {del_pkg['name']}...")
+            success = unsubscribe(
+                api_key,
+                tokens,
+                del_pkg["quota_code"],
+                del_pkg["product_subscription_type"],
+                del_pkg["product_domain"]
+            )
+            if success:
+                print("Successfully unsubscribed from the package.")
+            else:
+                print("Failed to unsubscribe from the package.")
+        else:
+            print("Unsubscribe cancelled.")
+        pause()
         return None
     selected_pkg = next((pkg for pkg in my_packages if str(pkg["number"]) == choice), None)
 
