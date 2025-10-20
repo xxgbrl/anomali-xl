@@ -14,6 +14,7 @@ from app.menus.package import fetch_my_packages, get_packages_by_family
 from app.menus.hot import show_hot_menu, show_hot_menu2
 from app.service.sentry import enter_sentry_mode
 from app.menus.purchase import purchase_by_family, purchase_loop
+from app.menus.famplan import show_family_info
 
 WIDTH = 55
 
@@ -35,6 +36,7 @@ def show_main_menu(profile):
     print("6. Riwayat Transaksi")
     print("7. [Test] Purchase all packages in family code")
     print("8. Order berulang by Family Code")
+    print("9. Family Plan/Akrab Organizer")
     print("00. Bookmark Paket")
     print("99. Tutup aplikasi")
     print("-------------------------------------------------------")
@@ -122,6 +124,8 @@ def main():
                 how_many = int(input("How many repeat: "))
 
                 purchase_loop(how_many, family_code, order, use_decoy, 0 if delay == "" else int(delay))
+            elif choice == "9":
+                show_family_info(AuthInstance.api_key, active_user["tokens"])
             elif choice == "00":
                 show_bookmark_menu()
             elif choice == "99":
