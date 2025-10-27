@@ -16,7 +16,8 @@ def purchase_by_family(
         family_code: str,
         use_decoy: bool,
         pause_on_success: bool = True,
-        token_confirmation_idx: int = 0,
+        delay_seconds: int = 0,
+        start_from_option: int = 1,
 ):
     api_key = AuthInstance.api_key
     tokens: dict = AuthInstance.get_active_tokens() or {}
@@ -62,6 +63,10 @@ def purchase_by_family(
     print("-------------------------------------------------------")
     successful_purchases = []
     packages_count = 0
+    start_buying = False
+    if start_from_option <= 1:
+        start_buying = True
+
     for variant in variants:
         packages_count += len(variant["package_options"])
 
@@ -70,6 +75,13 @@ def purchase_by_family(
         variant_name = variant["name"]
         for option in variant["package_options"]:
             tokens = AuthInstance.get_active_tokens()
+
+            option_order = option["order"]
+            if not start_buying and option_order == start_from_option:
+                start_buying = True
+            if not start_buying:
+                print(f"Skipping option {option_order}. {option['name']}")
+                continue
 
             option_name = option["name"]
             option_order = option["order"]
@@ -133,7 +145,7 @@ def purchase_by_family(
             res = None
 
             overwrite_amount = target_package_detail["package_option"]["price"]
-            if use_decoy:
+            if use_decoy or overwrite_amount == 0:
                 overwrite_amount += decoy_package_detail["package_option"]["price"]
 
             try:
@@ -144,6 +156,7 @@ def purchase_by_family(
                     "BUY_PACKAGE",
                     False,
                     overwrite_amount,
+                    token_confirmation_idx=1
                 )
 
                 if res and res.get("status", "") != "SUCCESS":
@@ -160,6 +173,7 @@ def purchase_by_family(
                             "BUY_PACKAGE",
                             False,
                             valid_amount,
+                            token_confirmation_idx=-1
                         )
                         if res and res.get("status", "") == "SUCCESS":
                             successful_purchases.append(
@@ -185,6 +199,9 @@ def purchase_by_family(
                 print(f"Exception occurred while creating order: {e}")
                 res = None
             print("-------------------------------------------------------")
+            if delay_seconds > 0:
+                print(f"Waiting for {delay_seconds} seconds before next purchase...")
+                time.sleep(delay_seconds)
 
     print(f"Total successful purchases for family {family_name}: {len(successful_purchases)}")
     if len(successful_purchases) > 0:
