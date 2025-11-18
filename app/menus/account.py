@@ -1,7 +1,6 @@
-from app.client.engsel import get_otp, submit_otp
+from app.client.ciam import get_otp, submit_otp
 from app.menus.util import clear_screen, pause
 from app.service.auth import AuthInstance
-
 
 def show_login_menu():
     clear_screen()
@@ -12,8 +11,7 @@ def show_login_menu():
     print("2. Submit OTP")
     print("99. Tutup aplikasi")
     print("-------------------------------------------------------")
-
-
+    
 def login_prompt(api_key: str):
     clear_screen()
     print("-------------------------------------------------------")
@@ -24,38 +22,43 @@ def login_prompt(api_key: str):
 
     if not phone_number.startswith("628") or len(phone_number) < 10 or len(phone_number) > 14:
         print("Nomor tidak valid. Pastikan nomor diawali dengan '628' dan memiliki panjang yang benar.")
-        return None, None
+        return None
 
     try:
         subscriber_id = get_otp(phone_number)
         if not subscriber_id:
-            return None, None
+            return None
         print("OTP Berhasil dikirim ke nomor Anda.")
-
-        while True:
+        
+        try_count = 5
+        while try_count > 0:
+            print(f"Sisa percobaan: {try_count}")
             otp = input("Masukkan OTP yang telah dikirim: ")
             if not otp.isdigit() or len(otp) != 6:
+                print("OTP tidak valid. Pastikan OTP terdiri dari 6 digit angka.")
                 continue
-
-            tokens = submit_otp(api_key, phone_number, otp)
+            
+            tokens = submit_otp(api_key, "SMS", phone_number, otp)
             if not tokens:
-                print("Gagal login. Periksa OTP dan coba lagi.")
+                print("OTP salah. Silahkan coba lagi.")
+                try_count -= 1
                 continue
-
+            
             print("Berhasil login!")
             return phone_number, tokens["refresh_token"]
-    except Exception as e:
-        return None, None
 
+        print("Gagal login setelah beberapa percobaan. Silahkan coba lagi nanti.")
+        return None, None
+    except Exception as e:
+        print(f"Gagal login: {e}")
+        return None, None
 
 def show_account_menu():
     clear_screen()
     AuthInstance.load_tokens()
     users = AuthInstance.refresh_tokens
     active_user = AuthInstance.get_active_user()
-
-    # print(f"users: {users}")
-
+        
     in_account_menu = True
     add_user = False
     while in_account_menu:
@@ -67,25 +70,31 @@ def show_account_menu():
                 print("Gagal menambah akun. Silahkan coba lagi.")
                 pause()
                 continue
-
+            
             AuthInstance.add_refresh_token(int(number), refresh_token)
             AuthInstance.load_tokens()
             users = AuthInstance.refresh_tokens
             active_user = AuthInstance.get_active_user()
-
+            
+            
             if add_user:
                 add_user = False
             continue
-
+        
         print("Akun Tersimpan:")
         if not users or len(users) == 0:
             print("Tidak ada akun tersimpan.")
 
         for idx, user in enumerate(users):
             is_active = active_user and user["number"] == active_user["number"]
-            active_marker = " (Aktif)" if is_active else ""
-            print(f"{idx + 1}. {user['number']}{active_marker}")
-
+            active_marker = "✅" if is_active else ""
+            
+            number = str(user.get("number", ""))
+            number = number + " " * (14 - len(number))
+            
+            sub_type = user.get("subscription_type", "").center(12)
+            print(f"{idx + 1}. {number} [{sub_type}] {active_marker}")
+        
         print("-" * 55)
         print("Command:")
         print("0: Tambah Akun")
@@ -107,13 +116,13 @@ def show_account_menu():
             parts = input_str.split()
             if len(parts) == 2 and parts[1].isdigit():
                 del_index = int(parts[1])
-
+                
                 # Prevent deleting the active user here
                 if active_user and users[del_index - 1]["number"] == active_user["number"]:
                     print("Tidak dapat menghapus akun aktif. Silahkan ganti akun terlebih dahulu.")
                     pause()
                     continue
-
+                
                 if 1 <= del_index <= len(users):
                     user_to_delete = users[del_index - 1]
                     confirm = input(f"Yakin ingin menghapus akun {user_to_delete['number']}? (y/n): ")

@@ -3,7 +3,6 @@ import re
 import textwrap
 from html.parser import HTMLParser
 
-
 def clear_screen():
     os.system('cls' if os.name == 'nt' else 'clear')
     width = 55
@@ -12,10 +11,19 @@ def clear_screen():
     print("=" * width)
     print("")
 
+    # if user_info:
+    #     credit = user_info.get("credit", 0)
+    #     premium_credit = user_info.get("premium_credit", 0)
+        
+    #     width = 55 
+    #     print("=" * width)
+    #     print(f" Credit: {credit} | Premium Credit: {premium_credit} ".center(width))
+    #     print("=" * width)
+    #     print("")
+        
 
 def pause():
     input("\nPress enter to continue...")
-
 
 class HTMLToText(HTMLParser):
     def __init__(self, width=80):
@@ -50,15 +58,23 @@ class HTMLToText(HTMLParser):
         # Wrap lines nicely
         return "\n".join(textwrap.wrap(text, width=self.width, replace_whitespace=False))
 
-
 def display_html(html_text, width=80):
     parser = HTMLToText(width=width)
     parser.feed(html_text)
     return parser.get_text()
 
 def get_api():
-    with open("apikey.anomali", "r") as f:
-        return f.read()
+    try:
+        with open("apikey.anomali", "r") as f:
+            api_key = f.read().strip()
+        return api_key
+    except FileNotFoundError:
+        # Prompt for API key or use a default
+        api_key = input("Enter your API key: ")
+        # Optionally save it for future use
+        with open("apikey.anomali", "w") as f:
+            f.write(api_key)
+        return api_key
 
 def format_quota_byte(quota_byte: int) -> str:
     GB = 1024 ** 3 
