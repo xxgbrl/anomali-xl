@@ -1,3 +1,4 @@
+import os
 from datetime import timezone, datetime
 import json
 import time
@@ -177,7 +178,7 @@ def settlement_balance(
         "x-signature": x_sig,
         "x-request-id": str(uuid.uuid4()),
         "x-request-at": java_like_timestamp(x_requested_at),
-        "x-version-app": "8.8.0",
+        "x-version-app": os.getenv("VERSION"),
     }
     
     url = f"{BASE_API_URL}/{path}"
